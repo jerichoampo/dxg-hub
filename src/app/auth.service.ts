@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { User } from './model/user';
 
 @Injectable({
@@ -24,6 +24,7 @@ export class AuthService {
 
         this.user.subscribe(
             (user) => {
+                console.log(user)
                 if (user) {
                     // this.login(user.uid);
                     this.userData = user
@@ -35,6 +36,14 @@ export class AuthService {
         );
     }
 
+    get currentUserObservable(): any {
+        return this.fauth.authState;
+    }
+
+    get authenticated(): boolean {
+        return this.userData !== null;
+    }
+
     signinWithGoogle() {
         this.fauth.auth.signInWithPopup (
             new firebase.auth.GoogleAuthProvider()
@@ -44,13 +53,11 @@ export class AuthService {
         }) 
     }
 
-    isLoggedIn(): boolean {
-        return this.userData !== null;
-    }
-
     logout() {
+        console.log('logout')
         this.fauth.auth.signOut()
-            .then(() => this.router.navigate(['/']));
+            .then(() => {this.router.navigate(['/']); console.log('signed out')})
+            .catch((err) => console.log(err));
     }
 
     private login(uid: string) {
@@ -70,7 +77,6 @@ export class AuthService {
                     console.log(this.userData != null)
                 }
             })
-            console.log(this.isLoggedIn())
     }
 
 }

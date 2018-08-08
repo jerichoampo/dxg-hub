@@ -14,6 +14,7 @@ import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './wildcard/page-not-found/page-not-found.component';
 import { AuthService } from './auth.service';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @NgModule({
     imports: [
@@ -30,7 +31,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     declarations: [
         AppComponent, 
         LoginComponent, 
-        PageNotFoundComponent, DashboardComponent
+        PageNotFoundComponent,
+        DashboardComponent
     ],
     providers: [ AuthService ],
     bootstrap: [ AppComponent ]
