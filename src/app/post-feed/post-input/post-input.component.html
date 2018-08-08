@@ -1,0 +1,13 @@
+<form #postForm="ngForm" (ngSubmit)="submitPost(); postForm.reset(); submitted = false">
+    <div>
+        <label>
+            Title: <input name="name" [(ngModel)]="post.title" type="text" placeholder="Leroy Jenkins" required />
+        </label>
+    </div>
+    <div>
+        <label>
+            Post: <textarea name="post" [(ngModel)]="post.body" placeholder="Leroooooy Jenkinsssssss!!!!" required ></textarea>
+        </label>
+    </div>
+    <button type="submit" [disabled]="!postForm.valid || submitted">Post</button>
+</form>

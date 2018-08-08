@@ -1,0 +1,10 @@
+<section>
+    <post-input></post-input>
+    <div >
+        <post 
+            *ngFor="let post of posts"
+            [title]="post.title"
+            [body]="post.body"
+        ></post>
+    </div>
+</section>
