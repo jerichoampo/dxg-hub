@@ -3,15 +3,18 @@ import { Router } from '@angular/router';
 import * as firebase from 'firebase';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
+import { User } from './model/user';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AuthService {
 
+    private usersPath: string = '/users';
     private user: Observable<firebase.User>;
-    private logged: Subject<boolean>;
+    // private userData: User = null;
+    private userData: any = null;
 
     constructor(private fauth: AngularFireAuth, 
                 private db: AngularFireDatabase, 
@@ -19,29 +22,30 @@ export class AuthService {
 
         this.user = fauth.authState;
 
-        this.logged = new Subject();
-
         this.user.subscribe(
             (user) => {
                 if (user) {
-                    this.addUser(user);
-                    this.logged.next(true);
+                    // this.login(user.uid);
+                    this.userData = user
                 }
                 else {
-                    this.logged.next(false);
+                    this.userData = null
                 }
             }
         );
     }
 
     signinWithGoogle() {
-        return this.fauth.auth.signInWithPopup (
+        this.fauth.auth.signInWithPopup (
             new firebase.auth.GoogleAuthProvider()
         )
+        .then((res) => {
+            console.log(res)
+        }) 
     }
 
-    isLoggedIn(): Observable<boolean> {
-        return this.logged.asObservable();
+    isLoggedIn(): boolean {
+        return this.userData !== null;
     }
 
     logout() {
@@ -49,8 +53,24 @@ export class AuthService {
             .then(() => this.router.navigate(['/']));
     }
 
-    private addUser(data) {
-        this.db.
+    private login(uid: string) {
+        let path = `${ this.usersPath }/${ uid }`;
+        this.db.database
+            .ref(path)
+            .once('value', snapshot => {
+                // create user if email does not exist
+                if (!snapshot.exists()) {
+                    this.db.object<User>(path)
+                        .set(new User(uid, this.fauth.auth.currentUser.email, new Date().toDateString(), new Date().toDateString()))
+                        .then(() => this.login(uid))
+                        .catch(err => console.error(err))
+                }
+                else {
+                    this.userData = snapshot.val();
+                    console.log(this.userData != null)
+                }
+            })
+            console.log(this.isLoggedIn())
     }
 
 }

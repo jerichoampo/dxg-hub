@@ -13,6 +13,7 @@ import { PostFeedModule } from './post-feed/post-feed.module';
 import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './wildcard/page-not-found/page-not-found.component';
 import { AuthService } from './auth.service';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
     imports: [
@@ -29,7 +30,7 @@ import { AuthService } from './auth.service';
     declarations: [
         AppComponent, 
         LoginComponent, 
-        PageNotFoundComponent
+        PageNotFoundComponent, DashboardComponent
     ],
     providers: [ AuthService ],
     bootstrap: [ AppComponent ]
