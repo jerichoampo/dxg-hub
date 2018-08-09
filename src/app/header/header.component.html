@@ -1,0 +1,8 @@
+<header *ngIf="headerVisibility$ | async">
+    <nav>
+        <a routerLink="journal">Journal</a> <!-- postings -->
+        <a routerLink="tavern">Tavern</a> <!-- List of LFGs -->
+        <a routerLink="war_room">War Room</a> <!-- Profile -->
+    </nav>
+    <a (click)="logout()">Flee</a>
+</header>

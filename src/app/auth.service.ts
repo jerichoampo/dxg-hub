@@ -5,6 +5,7 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable, of } from 'rxjs';
 import { User } from './model/user';
+import { AngularFirestore } from '../../node_modules/angularfire2/firestore';
 
 @Injectable({
     providedIn: 'root'
@@ -12,31 +13,22 @@ import { User } from './model/user';
 export class AuthService {
 
     private usersPath: string = '/users';
-    private user: Observable<firebase.User>;
-    // private userData: User = null;
-    private userData: any = null;
+    private authState: firebase.User = null;
+    private userData:  any = null;
 
     constructor(private fauth: AngularFireAuth, 
                 private db: AngularFireDatabase, 
+                private fdb: AngularFirestore,
                 private router: Router) { 
 
-        this.user = fauth.authState;
-
-        this.user.subscribe(
-            (user) => {
-                console.log(user)
-                if (user) {
-                    // this.login(user.uid);
-                    this.userData = user
-                }
-                else {
-                    this.userData = null
-                }
+        this.fauth.authState.subscribe((auth) => {
+            if (auth) {
+                this.loginUser(auth)
             }
-        );
+        });
     }
 
-    get currentUserObservable(): any {
+    get authenticatedObservable(): any {
         return this.fauth.authState;
     }
 
@@ -44,40 +36,84 @@ export class AuthService {
         return this.userData !== null;
     }
 
+    get userUid(): string {
+        return this.userData ? this.userData.uid : '';
+    }
+    
+    get userProfileData(): User {
+        return this.authenticated ? this.userData : null;
+    }
+
     signinWithGoogle() {
         this.fauth.auth.signInWithPopup (
             new firebase.auth.GoogleAuthProvider()
         )
-        .then((res) => {
-            console.log(res)
-        }) 
+        // .then((res) => this.loginUser(res.user)) 
+    }
+
+    private loginUser(data: any) {
+        let path = `${ this.usersPath }/${ data.uid }`;
+
+        const userListener$ = this.fdb.firestore.doc(path).onSnapshot(snapshot => {
+            if (!snapshot.exists) {
+                let user = {
+                    uid: data.uid,
+                    email: data.email,
+                    dateCreated: new Date().toDateString(),
+                    dateUpdated: new Date().toDateString(),
+                    displayName: data.displayName,
+                    userImageUrl: data.photoURL
+                }                
+
+                this.fdb.doc(path).set(user);
+            }
+            else {
+                this.userData = snapshot.data();
+                this.router.navigate(['/']);
+                userListener$();
+            }
+        })
     }
 
     logout() {
-        console.log('logout')
         this.fauth.auth.signOut()
-            .then(() => {this.router.navigate(['/']); console.log('signed out')})
+            .then(() => {
+                this.userData = null;
+                this.router.navigate(['/login'])
+            })
             .catch((err) => console.log(err));
     }
 
-    private login(uid: string) {
-        let path = `${ this.usersPath }/${ uid }`;
-        this.db.database
-            .ref(path)
-            .once('value', snapshot => {
-                // create user if email does not exist
-                if (!snapshot.exists()) {
-                    this.db.object<User>(path)
-                        .set(new User(uid, this.fauth.auth.currentUser.email, new Date().toDateString(), new Date().toDateString()))
-                        .then(() => this.login(uid))
-                        .catch(err => console.error(err))
-                }
-                else {
-                    this.userData = snapshot.val();
-                    console.log(this.userData != null)
-                }
-            })
-    }
+    // private loginUser(data: any) {
+    //     let path = `${ this.usersPath }/${ data.user.uid }`;
+    //     this.db.database
+    //         .ref(path)
+    //         .once('value', snapshot => {
+    //             if (!snapshot.exists()) {
+    //                 let user = new User(
+    //                     data.user.uid,
+    //                     data.user.email,
+    //                     new Date().toDateString(),
+    //                     new Date().toDateString(),
+    //                     data.user.displayName,
+    //                     data.user.photoURL
+    //                 )
 
+    //                 this.db.object<User>(path).set(user)
+    //                     .then(() => this.loginUser(data))
+    //                     .catch(err => console.error(err))
+    //             }
+    //             else {
+    //                 this.userData = snapshot.val();
+    //                 this.router.navigate(['/']);
+    //             }
+    //         })
+    // }
+
+    // logout() {
+    //     this.fauth.auth.signOut()
+    //         .then(() => this.router.navigate(['/login']))
+    //         .catch((err) => console.log(err));
+    // }
 }
  
