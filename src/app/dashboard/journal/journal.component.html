@@ -4,3 +4,13 @@
     <button>Create</button>
 </form>
 
+<div *ngIf="entry$ | async as user; else loading">
+    <div>{{ user.displayName }}</div>
+</div>
+
+<ng-template #loading>
+    <div>loading...</div>
+</ng-template>
+
+
+

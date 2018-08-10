@@ -24,7 +24,7 @@ import { HeaderComponent } from './header/header.component';
         // firebase 
         AngularFireModule.initializeApp(environment.firebase, 'dxg-hub'),
         AngularFireDatabaseModule,
-        AngularFirestoreModule,
+        AngularFirestoreModule.enablePersistence(),
         AngularFireAuthModule,
 
         AppRoutingModule
