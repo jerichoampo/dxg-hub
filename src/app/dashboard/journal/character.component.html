@@ -1,0 +1,13 @@
+<div>
+    <div>
+        <img [src]="imageUrl" />
+    </div>
+    <div>
+        <div>{{ data.name }}</div>
+        <div>
+            <span>{{ factions[data.faction] }}</span>
+            <span *ngIf="wowRaces$ | async as wow">{{ wow.races[data.race-1].name }}</span>
+            <span *ngIf="wowClasses$ | async as wow">{{ wow.classes[data.class-1].name }}</span>
+        </div>
+    </div>
+</div>

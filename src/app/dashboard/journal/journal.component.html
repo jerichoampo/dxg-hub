@@ -1,15 +1,34 @@
-<form>
-    <input placeholder="title"/>
-    <input placeholder="short description"/>
-    <button>Create</button>
-</form>
 
-<div *ngIf="entry$ | async as user; else loading">
-    <div>{{ user.displayName }}</div>
+<div *ngIf="user else loading">
+        <div>Welcome {{ user.displayName }}</div>
+
+    <div>
+        <ng-container *ngTemplateOutlet="user?.wow_character ? addEntry : getCharacter; context: {user:user}"></ng-container>
+    </div>
+
+    <character [data]="user?.wow_character"></character>
+
 </div>
 
 <ng-template #loading>
     <div>loading...</div>
+</ng-template>
+
+<ng-template #addEntry let-user="user">
+    <form>
+        <input placeholder="title"/>
+        <input placeholder="short description"/>
+        <button>Create</button>
+    </form>
+</ng-template>
+
+<ng-template #getCharacter let-user="user">
+    <form #getCharacterForm="ngForm" (ngSubmit)="updateUser(character.realm, character.name, user.uid)">
+        <input [(ngModel)]="character.realm" name="realm" type="text" value="Barthilas" required disabled/>
+        <input [(ngModel)]="character.name" name="name" type="text" required placeholder="Character Name"/>
+        <label>Note: field is case sensitive</label>
+        <button type="submit" [disabled]="!getCharacterForm.valid">Add</button>
+    </form>
 </ng-template>
 
 

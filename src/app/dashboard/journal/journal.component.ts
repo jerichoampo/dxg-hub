@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../auth.service';
 import { AngularFirestore } from 'angularfire2/firestore';
 import { Observable } from 'rxjs';
+import { WowService } from '../../wow/wow.service';
+import { User } from '../../model/user';
 
 @Component({
   selector: 'app-journal',
@@ -10,25 +12,28 @@ import { Observable } from 'rxjs';
 })
 export class JournalComponent {
 
-    private entry$: Observable<any>;
+    private user: User;
+    private wow_races$: Observable<any>;
+    private wow_classes$: Observable<any>;
+
+
+    private character = { realm: "Barthilas", name: "" };
 
     constructor(private auth: AuthService,
+                private wow: WowService,
                 private db: AngularFirestore) {
 
-        this.entry$ = this.auth.currentUser$
-        // const entryRef = this.db.firestore.collection('journals').doc(this.auth.userUid);
+        this.auth.currentUser$.subscribe((rawUser) => {
+            this.user = rawUser
+        })
+    }
 
-        // entryRef.get().then((document) => {
-        //     if (!document.exists) {
-        //         let entry = {
-        //             published: false,
-        //             title: `Welcome ${ this.auth.userProfileData.displayName }!`,
-        //             shortDescription: "Your entry here..."
-        //         }
-        //         entryRef.set(entry);
-        //     }
-        // })
-
+    updateUser(realm: any, name: any, uid: any) {
+        this.wow.getCharacter(realm, name)
+            .then((res) => {
+                this.auth.addWowCharacter(res);
+            })
+            .catch((err) => console.log(err))
     }
 
 }

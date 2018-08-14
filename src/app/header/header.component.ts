@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { map } from 'rxjs/operators';
+import { map,first } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 import { Observable } from '../../../node_modules/rxjs';
 
@@ -13,7 +13,7 @@ export class HeaderComponent {
     private headerVisibility$: Observable<boolean>;
 
     constructor(private auth: AuthService) {
-        this.headerVisibility$ = this.auth.authenticated$.pipe(map(user => !!user))
+        this.headerVisibility$ = this.auth.currentUser$.pipe( map(user => !!user))
     }
 
     logout() { this.auth.logout() }
